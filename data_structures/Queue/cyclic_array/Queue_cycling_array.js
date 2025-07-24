@@ -13,8 +13,13 @@ class Queue {
         return this.#cnt === 0;
     }
 
+    // проверка размера очереди
+    size() {
+        return this.#queue.length;
+    }
+
     // посмотреть первый элемент очереди
-    peak() {
+    peek() {
         return this.#queue[this.#start];
     }
 
@@ -49,7 +54,7 @@ class Queue {
         }
 
         this.#start = 0;
-        this.#end = this.#cnt - 1;
+        this.#end = this.#queue.length;
         this.#queue = newQueue;
     }
 
@@ -92,12 +97,11 @@ class Queue {
             return this;
         }
 
-        // если в очереди нет места
+        // если end === length
         if (this.#end === this.#queue.length - 1) {
             // если this.#start === 0
             if (this.#start === 0) {
                 this.#increaseSize(this.#start);
-                this.#end += 1;
                 this.#queue[this.#end] = x;
             } else {
                 this.#queue[0] = x;
@@ -107,10 +111,9 @@ class Queue {
             return this;
         }
 
-        // если end упирается в start
+        // если end === start
         if (this.#end + 1 === this.#start) {
             this.#increaseSize(this.#start);
-            this.#end += 1;
             this.#queue[this.#end] = x;
             this.#cnt += 1;
             return this;
@@ -140,14 +143,14 @@ class Queue {
 
         this.#start += 1;
 
+        // проверяем this.#start
+        if (this.#start === this.#queue.length - 1) {
+            this.#start = 0;
+        }
+
         // функция уменьшения размера
         if (this.#cnt === this.#queue.length / 4 && this.#queue.length >= 16) {
             this.#decreaseSize(this.#start);
-        }
-
-        // проверяем this.#start
-        if (this.#start === this.#queue.length - 1) {
-            this.#start === 0;
         }
 
         return elem;
@@ -163,147 +166,70 @@ class Queue {
     }
 }
 
-// Проверка работы
-const q = new Queue();
-// заполнение
-for (let i = 0; i < 8; i++) {
-    q.add(i);
-}
+// ПРОВЕРКА РАБОТЫ ОЧЕРЕДИ:
 
-console.log(q.showQueue(), 'добавление 8 элементов');
-
-q.add(8);
-console.log(q.showQueue(), '+1 элемент - расширение');
-
-q.pop();
-q.pop();
-console.log(q.showQueue(), 'удаление 2-х');
-
-for (let i = 0; i < 7; i++) {
-    q.pop();
-}
-
-console.log(q.showQueue(), 'удаление всех ');
-
-// заполнение
-for (let i = 0; i < 8; i++) {
-    q.add(i);
-}
-
-console.log(q.showQueue(), 'заполнение ');
-
-q.pop();
-q.pop();
-q.add(9);
-q.add(10);
-
-console.log(q.showQueue(), 'проверка цикла ');
-
-q.add(11);
-console.log(q.showQueue(), 'расширяем ');
-
-for (let i = 12; i < 54; i++) {
-    q.add(i);
-}
-console.log(q.showQueue(), 'расширяем ');
-
-q.clearQueue();
-console.log(q.showQueue(), 'отчищаем ');
-
-const testObj = {
-    t1: {
-        t5: {},
-        t6: {},
-        t7: {
-            t18: {},
-            t19: {},
-            t20: {},
-            t21: {
-                t39: {},
-                t40: {},
-                t41: {},
+const test = {
+    a1: 2,
+    a2: 3,
+    a3: {
+        b1: 4,
+        b2: 5,
+        b3: {
+            c1: {
+                d1: 9,
             },
+            c2: 7,
+        },
+        b4: {
+            c3: 4,
+            c4: 6,
         },
     },
-    t2: {
-        t8: {},
-        t9: {},
-        t10: {
-            t22: {},
-            t23: {},
-            t24: {},
-            t25: {
-                t42: {},
-                t43: {},
-                t44: {},
+    a4: {
+        b5: 9,
+    },
+    a5: 2,
+    a6: 3,
+    a7: {
+        b6: 4,
+        b7: 5,
+        b8: {
+            c5: {
+                d2: 9,
             },
+            c6: 7,
         },
-        t11: {
-            t26: {},
-            t27: {},
-            t28: {},
-            t29: {
-                t45: {},
-            },
+        b9: {
+            c7: 4,
+            c8: 6,
         },
     },
-    t3: {
-        t12: {},
-        t13: {},
-        t14: {
-            t30: {},
-            t31: {},
-            t32: {},
-            t33: {
-                t46: {},
-                t47: {},
-                t48: {},
-                t49: 'i',
-            },
-            t34: {
-                t50: {},
-                t51: {},
-                t52: {},
-                t53: {
-                    a: {},
-                },
-            },
-        },
-    },
-    t4: {
-        t15: {},
-        t16: {},
-        t17: {
-            t35: {},
-            t36: {},
-            t37: {},
-            t38: {
-                t54: {},
-                t55: {},
-                t56: {},
-            },
-        },
+    a8: {
+        b10: 9,
     },
 };
 
+// обход в ширину с помощью очереди
+
 const bfs = (obj) => {
+    const keyInObj = [];
     const q = new Queue();
-    let findI = false;
     q.add(obj);
 
     while (!q.isEmpty()) {
         const elem = q.pop();
-        for (let key in elem) {
-            if (elem[key] === 'i') {
-                findI = true;
-            }
+        for (const key in elem) {
             if (typeof elem[key] === 'object') {
                 q.add(elem[key]);
+            } else {
+                if (elem[key] === 9) {
+                    keyInObj.push(key);
+                }
             }
         }
     }
-    console.log(q.showQueue());
-    return findI;
+
+    return keyInObj;
 };
 
-console.log(bfs(testObj));
+console.log(bfs(test));
