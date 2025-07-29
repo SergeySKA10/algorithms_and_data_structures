@@ -11,7 +11,7 @@ class LinkedList {
     #length = 0;
 
     // добавление в начало
-    prepend() {
+    prepend(val) {
         if (this.#length === 0) {
             const node = new Node(val, null);
             this.#head = node;
@@ -200,6 +200,8 @@ class LinkedList {
             if (list.val === node.val && list.next === node.next) {
                 return list;
             }
+
+            list = list.next;
         }
 
         return false;
