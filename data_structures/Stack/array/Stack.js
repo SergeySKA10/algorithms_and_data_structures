@@ -119,17 +119,14 @@ const validSyntax = (str) => {
 
             if (elem === '{') {
                 if (str[i] !== '}') {
-                    console.log(i, false);
                     return false;
                 }
             } else if (elem === '(') {
                 if (str[i] !== ')') {
-                    console.log(i, false);
                     return false;
                 }
             } else if (elem === '[') {
                 if (str[i] !== ']') {
-                    console.log(i, false);
                     return false;
                 }
             } else {
