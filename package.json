@@ -1,0 +1,23 @@
+{
+    "name": "algorithms",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "test": "jest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/SergeySKA10/algorithms_and_data_structures.git"
+    },
+    "keywords": [],
+    "author": "Karakoskin Sergey",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/SergeySKA10/algorithms_and_data_structures/issues"
+    },
+    "homepage": "https://github.com/SergeySKA10/algorithms_and_data_structures#readme",
+    "description": "",
+    "devDependencies": {
+        "jest": "^30.0.5"
+    }
+}

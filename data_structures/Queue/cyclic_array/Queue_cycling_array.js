@@ -15,7 +15,7 @@ class Queue {
 
     // проверка размера очереди
     size() {
-        return this.#queue.length;
+        return this.#cnt;
     }
 
     // посмотреть первый элемент очереди
@@ -29,58 +29,22 @@ class Queue {
     }
 
     // увеличение размера
-    #increaseSize(ind) {
+    #increaseSize() {
         const newQueue = new Array(this.#queue.length * 2);
-
-        if (ind === 0) {
-            for (let i = 0; i < this.#queue.length; i++) {
-                newQueue[i] = this.#queue[i];
-            }
-        } else {
-            let j = 0;
-            if (this.#end < ind) {
-                for (let i = ind; i < this.#queue.length; i++) {
-                    newQueue[j++] = this.#queue[i];
-                }
-
-                for (let i = 0; i <= this.#end; i++) {
-                    newQueue[j++] = this.#queue[i];
-                }
-            } else {
-                for (let i = ind; i <= this.#end; i++) {
-                    newQueue[j++] = this.#queue[i];
-                }
-            }
+        for (let i = 0; i < this.#cnt; i++) {
+            newQueue[i] = this.#queue[(this.#start + i) % this.#queue.length];
         }
-
         this.#start = 0;
-        this.#end = this.#queue.length;
+        this.#end = this.#cnt - 1;
         this.#queue = newQueue;
     }
 
     // уменьшение размера
-    #decreaseSize(ind) {
+    #decreaseSize() {
         const newQueue = new Array(this.#queue.length / 2);
-        if (ind === 0) {
-            for (let i = ind; i < this.#cnt; i++) {
-                newQueue[i] = this.#queue[i];
-            }
-        } else {
-            let j = 0;
-            if (this.#end < ind) {
-                for (let i = ind; i < this.#queue.length; i++) {
-                    newQueue[j++] = this.#queue[i];
-                }
-                for (let i = 0; i <= this.#end; i++) {
-                    newQueue[j++] = this.#queue[i];
-                }
-            } else {
-                for (let i = ind; i <= this.#end; i++) {
-                    newQueue[j++] = this.#queue[i];
-                }
-            }
+        for (let i = 0; i < this.#cnt; i++) {
+            newQueue[i] = this.#queue[(this.#start + i) % this.#queue.length];
         }
-
         this.#start = 0;
         this.#end = this.#cnt - 1;
         this.#queue = newQueue;
@@ -101,7 +65,7 @@ class Queue {
         if (this.#end === this.#queue.length - 1) {
             // если this.#start === 0
             if (this.#start === 0) {
-                this.#increaseSize(this.#start);
+                this.#increaseSize();
                 this.#queue[this.#end] = x;
             } else {
                 this.#queue[0] = x;
@@ -113,7 +77,7 @@ class Queue {
 
         // если end === start
         if (this.#end + 1 === this.#start) {
-            this.#increaseSize(this.#start);
+            this.#increaseSize();
             this.#queue[this.#end] = x;
             this.#cnt += 1;
             return this;
@@ -141,22 +105,17 @@ class Queue {
             return elem;
         }
 
-        this.#start += 1;
+        this.#start = (this.#start + 1) % this.#queue.length;
 
-        // проверяем this.#start
-        if (this.#start === this.#queue.length - 1) {
-            this.#start = 0;
-        }
-
-        // функция уменьшения размера
+        // Проверяем сужение здесь!
         if (this.#cnt === this.#queue.length / 4 && this.#queue.length >= 16) {
-            this.#decreaseSize(this.#start);
+            this.#decreaseSize();
         }
 
         return elem;
     }
 
-    // отчиска очереди
+    // отчистка очереди
     clearQueue() {
         this.#queue = new Array(8);
         this.#start = null;
@@ -166,70 +125,4 @@ class Queue {
     }
 }
 
-// ПРОВЕРКА РАБОТЫ ОЧЕРЕДИ:
-
-const test = {
-    a1: 2,
-    a2: 3,
-    a3: {
-        b1: 4,
-        b2: 5,
-        b3: {
-            c1: {
-                d1: 9,
-            },
-            c2: 7,
-        },
-        b4: {
-            c3: 4,
-            c4: 6,
-        },
-    },
-    a4: {
-        b5: 9,
-    },
-    a5: 2,
-    a6: 3,
-    a7: {
-        b6: 4,
-        b7: 5,
-        b8: {
-            c5: {
-                d2: 9,
-            },
-            c6: 7,
-        },
-        b9: {
-            c7: 4,
-            c8: 6,
-        },
-    },
-    a8: {
-        b10: 9,
-    },
-};
-
-// обход в ширину с помощью очереди
-
-const bfs = (obj) => {
-    const keyInObj = [];
-    const q = new Queue();
-    q.add(obj);
-
-    while (!q.isEmpty()) {
-        const elem = q.pop();
-        for (const key in elem) {
-            if (typeof elem[key] === 'object') {
-                q.add(elem[key]);
-            } else {
-                if (elem[key] === 9) {
-                    keyInObj.push(key);
-                }
-            }
-        }
-    }
-
-    return keyInObj;
-};
-
-console.log(bfs(test));
+module.exports.Queue = Queue;
