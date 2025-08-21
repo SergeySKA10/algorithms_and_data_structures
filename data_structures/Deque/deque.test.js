@@ -86,4 +86,77 @@ describe('Deque cycling array', () => {
         expect(deque.size()).toBe(4);
         expect(deque.get_length()).toBe(8);
     });
+
+    // Тестирование edge-случаев (угловые случаи)
+    test('should handle multiple resize', () => {
+        for (let i = 0; i < 17; i++) {
+            deque.push_back(i);
+        }
+
+        expect(deque.get_length()).toBe(32);
+
+        for (let i = 0; i < 13; i++) {
+            deque.pop_back();
+        }
+
+        expect(deque.get_length()).toBe(8);
+    });
+
+    // переполнение с методом front
+    test('should resize buffer then full', () => {
+        for (let i = 0; i < 8; i++) {
+            deque.push_front(i);
+        }
+
+        expect(deque.get_length()).toBe(8);
+        expect(deque.size()).toBe(8);
+
+        deque.push_front(9);
+
+        expect(deque.get_length()).toBe(16);
+        expect(deque.size()).toBe(9);
+        expect(deque.get_back()).toBe(0);
+        expect(deque.get_front()).toBe(9);
+    });
+
+    // чередование операций
+    test('should handle mixed operations', () => {
+        deque.push_front(1);
+        deque.push_back(2);
+        deque.push_front(3);
+        deque.push_back(4);
+
+        expect(deque.pop_front()).toBe(3);
+        expect(deque.pop_back()).toBe(4);
+        expect(deque.pop_front()).toBe(1);
+        expect(deque.pop_back()).toBe(2);
+        expect(deque.isEmpty()).toBe(true);
+    });
+
+    // тест на больших данных
+    test('should handle large data set', () => {
+        const n = 1000;
+        for (let i = 0; i < n; i++) {
+            deque.push_back(i);
+        }
+
+        expect(deque.size()).toBe(n);
+
+        for (let i = 0; i < n; i++) {
+            expect(deque.pop_front()).toBe(i);
+        }
+
+        expect(deque.isEmpty()).toBe(true);
+    });
+
+    // Тест: Производительность операций
+    test('should have amortized O(1) operations', () => {
+        const start = performance.now();
+        for (let i = 0; i < 1000000; i++) {
+            deque.push_back(i);
+        }
+        const end = performance.now();
+
+        expect(end - start).toBeLessThan(1000);
+    });
 });

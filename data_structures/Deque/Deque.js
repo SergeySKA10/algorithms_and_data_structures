@@ -1,63 +1,52 @@
 class Deque {
+    //массив для хранения
     #deque = new Array(8);
+    // счетчик элементов
     #cnt = 0;
+    // позиция первого элемента
     #start = null;
+    // позиция последнего элемента
     #end = null;
 
     // увеличение размера дека
-    #increaseSize(el, place) {
-        if (el) {
-            if (place === 'back') {
-                const newDeque = new Array(this.#deque.length * 2);
+    #increaseSize() {
+        // создаем новый массив
+        const newDeque = new Array(this.#deque.length * 2);
 
-                for (let i = 0; i < this.#cnt; i++) {
-                    newDeque[i] =
-                        this.#deque[(this.#start + i) % this.#deque.length];
-                }
-
-                this.#end = this.#cnt;
-                this.#cnt += 1;
-                this.#start = 0;
-                this.#deque = newDeque;
-                this.#deque[this.#end] = el;
-                return;
-            }
-
-            if (place === 'front') {
-                const newDeque = new Array(this.#deque.length * 2);
-                newDeque[0] = el;
-
-                for (let i = 1; i <= this.#cnt; i++) {
-                    newDeque[i] =
-                        this.#deque[(this.#start + i - 1) % this.#deque.length];
-                }
-
-                this.#end = this.#cnt;
-                this.#cnt += 1;
-                this.#start = 0;
-                this.#deque = newDeque;
-                return;
-            }
-        } else {
-            throw new Error('no argument passed to function');
-        }
-    }
-
-    // уменьшение размера
-    #decreaseSize() {
-        const newDeque = new Array(this.#deque.length / 2);
-
+        // перебираем элементы и добавляем их в новый массив используя % для вычисления индекса
         for (let i = 0; i < this.#cnt; i++) {
             newDeque[i] = this.#deque[(this.#start + i) % this.#deque.length];
         }
 
+        // назначаем указатели
         this.#start = 0;
         this.#end = this.#cnt - 1;
+
+        // назначаем новое хранилище для элементов
+        this.#deque = newDeque;
+    }
+
+    // уменьшение размера
+    #decreaseSize() {
+        // создаем новый массив
+        const newDeque = new Array(this.#deque.length / 2);
+
+        // перебираем элементы и добавляем их в новый массив используя % для вычисления индекса
+        for (let i = 0; i < this.#cnt; i++) {
+            newDeque[i] = this.#deque[(this.#start + i) % this.#deque.length];
+        }
+
+        // назначаем указатели
+        this.#start = 0;
+        this.#end = this.#cnt - 1;
+
+        // назначаем новое хранилище для элементов
         this.#deque = newDeque;
     }
 
     // вставка в начало
     push_front(elem) {
+        // проверка на пустоту с заполнением
         if (this.isEmpty()) {
             this.#start = 0;
             this.#end = 0;
@@ -66,29 +55,25 @@ class Deque {
 
             return this;
         } else {
+            // условие увеличение размера массива
             if (this.#cnt === this.#deque.length) {
-                this.#increaseSize(elem, 'front');
-                return this;
-            } else if (this.#start === 0) {
-                for (let i = this.#cnt; i > 0; i--) {
-                    this.#deque[i] = this.#deque[i - 1];
-                }
-                this.#deque[this.#start] = elem;
-                this.#end += 1;
-                this.#cnt += 1;
-                return this;
-            } else {
-                this.#start -= 1;
-                this.#cnt += 1;
-                this.#deque[this.#start] = elem;
+                this.#increaseSize();
             }
 
+            // вычисляем start c помощью % (зацикливание)
+            this.#start =
+                (this.#start - 1 + this.#deque.length) % this.#deque.length;
+
+            // присваиваем значение и увеличиваем счетчик
+            this.#deque[this.#start] = elem;
+            this.#cnt++;
             return this;
         }
     }
 
     // вставка в конец
     push_back(elem) {
+        // проверка на пустоту с заполнением
         if (this.isEmpty()) {
             this.#start = 0;
             this.#end = 0;
@@ -98,16 +83,23 @@ class Deque {
             return this;
         }
 
+        // условие увеличение размера массива
         if (this.#cnt === this.#deque.length) {
-            this.#increaseSize(elem, 'back');
+            this.#increaseSize();
+            this.#end += 1;
+            this.#deque[this.#end] = elem;
+            this.#cnt += 1;
             return this;
         } else {
+            // условие для зацикливания
             if (this.#end === this.#deque.length - 1) {
                 this.#end = 0;
             } else {
                 this.#end += 1;
             }
         }
+
+        // присваиваем значение и увеличиваем счетчик
         this.#deque[this.#end] = elem;
         this.#cnt += 1;
         return this;
@@ -115,20 +107,28 @@ class Deque {
 
     // удаление с начала
     pop_front() {
+        // проверка на пустоту
         if (this.isEmpty()) {
             return 'Dequeu is empty';
         }
 
+        // удаление элемента
         const elem = this.#deque[this.#start];
         this.#deque[this.#start] = null;
         this.#cnt -= 1;
 
+        // проверка на пустоту
         if (this.#cnt === 0) {
             this.clear();
         } else {
-            this.#start += 1;
+            this.#start =
+                (this.#start + 1 + this.#deque.length) % this.#deque.length;
 
-            if (this.#cnt === this.#deque.length / 4) {
+            // условие для уменьшения размера
+            if (
+                this.#cnt === this.#deque.length / 4 &&
+                this.#deque.length >= 16
+            ) {
                 this.#decreaseSize();
             }
         }
@@ -138,20 +138,24 @@ class Deque {
 
     // удаление с конца
     pop_back() {
+        // проверка на пустоту
         if (this.isEmpty()) {
             return 'Dequeu is empty';
         }
 
+        // удаление элемента
         const elem = this.#deque[this.#end];
         this.#deque[this.#end] = null;
-        this.#end -= 1;
+        this.#end = (this.#end - 1 + this.#deque.length) % this.#deque.length;
         this.#cnt -= 1;
 
+        // проверка на пустоту
         if (this.#cnt === 0) {
             this.clear();
         }
 
-        if (this.#cnt === this.#deque.length / 4) {
+        // условие для уменьшения размера
+        if (this.#cnt === this.#deque.length / 4 && this.#deque.length >= 16) {
             this.#decreaseSize();
         }
 
