@@ -1,7 +1,6 @@
 class Stack {
     #stack = new Array(8);
     #cnt = 0;
-    #start = null;
 
     // проверка на пустоту стека
     isEmpty() {
@@ -13,16 +12,21 @@ class Stack {
         if (this.isEmpty()) {
             return 'stack is empty';
         }
-        return this.#stack[this.#start];
+        return this.#stack[this.#cnt - 1];
     }
 
     // показ всего стека
     showStack() {
-        return this.#stack;
+        return this.#stack.slice(0, this.#cnt);
     }
 
     // текущий размер стека
     size() {
+        return this.#cnt;
+    }
+
+    // возврат длинны массива
+    capacity() {
         return this.#stack.length;
     }
 
@@ -35,7 +39,6 @@ class Stack {
         }
 
         this.#stack = newStack;
-        return this;
     }
 
     // уменьшение стека
@@ -47,34 +50,24 @@ class Stack {
         }
 
         this.#stack = newStack;
-        return this.#stack;
     }
 
     // отчиска стека
     clearStack() {
         this.#stack = new Array(8);
         this.#cnt = 0;
-        this.#start = null;
         return this;
     }
 
     // добавление в стек
-    add(x) {
-        if (this.isEmpty()) {
-            this.#start = 0;
-            this.#cnt += 1;
-            this.#stack[this.#start] = x;
-            return this;
-        }
-
+    push(x) {
         // если стек заполнен
-        if (this.#start === this.#stack.length - 1) {
+        if (this.#cnt === this.#stack.length - 1) {
             this.#increaseSize();
         }
 
-        this.#start += 1;
+        this.#stack[this.#cnt] = x;
         this.#cnt += 1;
-        this.#stack[this.#start] = x;
         return this;
     }
 
@@ -84,18 +77,16 @@ class Stack {
             return 'Stack is empty';
         }
 
-        const elem = this.#stack[this.#start];
-
-        this.#stack[this.#start] = null;
-        this.#start -= 1;
         this.#cnt -= 1;
+        const elem = this.#stack[this.#cnt];
 
-        if (this.#start === 0) {
-            this.clearStack();
-            return elem;
-        }
+        this.#stack[this.#cnt] = null;
 
-        if (this.#cnt === this.#stack.length / 4) {
+        if (
+            this.#cnt > 0 &&
+            this.#cnt === this.#stack.length / 4 &&
+            this.#stack.length >= 16
+        ) {
             this.#decreaseSize();
         }
 
@@ -103,18 +94,17 @@ class Stack {
     }
 }
 
-// ПРОВЕРКА РАБОТЫ СТЕКА:
-
-const s = '{([({[({[]})]})])}{({{[()]}})}'; // true
-const str2 = '{([])}{([({({({([()])}])})})})})]'; // false
+// ПРОВЕРКА РАБОТЫ СТЕКА: Задача на валидность синтаксиса
 
 const validSyntax = (str) => {
     const stack = new Stack();
 
     for (let i = 0; i < str.length; i++) {
         if (str[i] === '(' || str[i] === '[' || str[i] === '{') {
-            stack.add(str[i]);
+            stack.push(str[i]);
         } else {
+            if (stack.isEmpty()) return false;
+
             const elem = stack.delete();
 
             if (elem === '{') {
@@ -135,8 +125,10 @@ const validSyntax = (str) => {
         }
     }
 
-    return true;
+    return stack.isEmpty();
 };
 
-console.log(validSyntax(s));
-console.log(validSyntax(str2));
+module.exports = {
+    Stack: Stack,
+    validSyntax: validSyntax,
+};
