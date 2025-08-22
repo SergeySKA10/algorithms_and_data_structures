@@ -282,7 +282,6 @@ class LinkedList {
 
         return b ? true : false;
     }
-
-    // сортировка
-    sort() {}
 }
+
+module.exports.LinkedList = LinkedList;
