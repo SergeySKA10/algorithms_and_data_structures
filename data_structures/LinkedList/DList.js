@@ -13,144 +13,159 @@ class LinkedList {
 
     // добавление в начало
     prepend(val) {
-        if (this.#length === 0) {
-            const node = new Node(val, null, null);
-            this.#head = node;
-            this.#tail = node;
-            this.#length += 1;
+        const node = new Node(val, this.#head, null);
+
+        if (this.#head) {
+            this.#head.prev = node;
         } else {
-            const node = new Node(val, this.#head, null);
-            this.#head = node;
-            this.#length += 1;
+            this.#tail = node;
         }
 
+        this.#head = node;
+        this.#length += 1;
         return this;
     }
 
     // добавление в конец
     append(val) {
+        const node = new Node(val, null, null);
+
         if (this.#length === 0) {
-            const node = new Node(val, null, null);
             this.#head = node;
-            this.#tail = node;
-            this.#length += 1;
         } else {
-            const node = new Node(val, null, this.#tail);
+            node.prev = this.#tail;
             this.#tail.next = node;
-            this.#tail = node;
-            this.#length += 1;
         }
 
+        this.#tail = node;
+        this.#length += 1;
         return this;
     }
 
-    // вставка элемента на позицию
-    insert(node, val) {
-        const nodeList = this.findNode(node);
+    // вставка элемента на позицию по переданному значению
+    insertAfterValue(targetValue, newValue) {
+        const targetNode = this.findNodeByValue(targetValue);
+        if (!targetNode) return false;
 
-        if (nodeList) {
-            const newNode = new Node(val, null, null);
+        const newNode = new Node(newValue, targetNode.next, targetNode);
+        targetNode.next = newNode;
 
-            if (!nodeList.next) {
-                nodeList.next = newNode;
-                newNode.prev = nodeList;
-                this.#tail = newNode;
-                this.#length += 1;
-            } else {
-                const next = nodeList.next;
-                nodeList.next = newNode;
-                newNode.prev = nodeList;
-                newNode.next = next;
-                next.prev = newNode;
-                this.#length += 1;
-            }
-
-            return this;
-        } else {
-            return 'Node is not defined in this LinkedList';
+        if (newNode.next) {
+            newNode.next.prev = newNode;
         }
+
+        this.#length += 1;
+
+        if (targetNode === this.#tail) this.#tail = newNode;
+
+        return true;
+    }
+
+    // вставка элемента на позицию по переданному индексу
+    insertAtIndex(index, value) {
+        if (index < 0 || index > this.#length) return false;
+
+        if (index === 0) return this.prepend(value);
+        if (index === this.#length) return this.append(value);
+
+        const prevNode = this.findNodeByIndex(index - 1);
+        const newNode = new Node(value, prevNode.next, prevNode);
+        prevNode.next = newNode;
+        newNode.next.prev = newNode;
+        this.#length += 1;
+
+        return true;
     }
 
     // удаление по значению
     remove(val) {
-        if (this.#length === 0) {
-            return 'Linked list is empty';
-        }
+        if (!this.#head) return null;
 
-        let list = this.#head;
-
-        if (list.val === val) {
-            this.#head = this.#head.next;
-
-            if (this.#head) {
-                this.#head.prev = null;
-            }
-
-            list = null;
+        // удаление головы
+        if (this.#head.value === val) {
+            const removedNode = this.#head;
             this.#length -= 1;
-            return this;
-        }
 
-        while (list) {
-            if (list.val === val) {
-                const node = list.next;
-                const prev = list.prev;
-
-                if (node) {
-                    prev.next = next;
-                    next.prev = prev;
-                    this.#length -= 1;
-                    return list;
-                } else {
-                    this.#tail = prev;
-                    prev.next = null;
-                    return list;
-                }
-            } else {
-                list = list.next;
+            if (this.#length === 0) {
+                this.#head = null;
+                this.#tail = null;
+                return removedNode;
             }
+
+            this.#head = this.#head.next;
+            this.#head.prev = null;
+            return removedNode;
         }
 
-        return 'Node is not find';
+        // поиск и удаление других узлов
+        let current = this.#head;
+        while (current.next) {
+            if (current.next.value === val) {
+                const removedNode = current.next;
+                current.next = current.next.next;
+                this.#length -= 1;
+
+                if (current.next) {
+                    current.next.prev = current;
+                } else {
+                    this.#tail = current;
+                }
+
+                return removedNode;
+            }
+
+            current = current.next;
+        }
+
+        return null;
     }
 
     // удаление с позиции
     pop(pos) {
-        if (this.#length === 0) {
+        if (pos < 0 || pos >= this.#length) return 'Position out of bounds';
+
+        if (!this.#head) {
             return 'Linked list is empty';
         }
 
         if (pos == 0) {
             const node = this.#head;
             this.#head = this.#head.next;
-            this.#head.prev = null;
             this.#length -= 1;
+
+            if (this.#head) {
+                this.#head.prev = null;
+            } else {
+                this.#tail = null;
+            }
+
             return node;
         }
 
-        let counterNode = 0;
-        let list = this.#head;
+        // ищем элемент = pos - 1
+        let current = this.#head;
+        let index = 0;
 
-        while (list) {
-            if (pos == count) {
-                const node = list.next;
-                const prev = list.prev;
-
-                if (node) {
-                    prev.next = next;
-                    next.prev = prev;
-                    this.#length -= 1;
-                    return list;
-                } else {
-                    this.#tail = prev;
-                    prev.next = null;
-                    return list;
-                }
-            } else {
-                list = list.next;
-                counterNode += 1;
-            }
+        while (current && index < pos - 1) {
+            current = current.next;
+            index++;
         }
+
+        // если не current или нет следующего элемента
+        if (!current || !current.next) return 'Position out of bounds';
+
+        // удаляем элемент и возвращаем его
+        const removedNode = current.next;
+        current.next = current.next.next;
+
+        if (current.next) {
+            current.next.prev = current;
+        } else {
+            this.#tail = current;
+        }
+
+        this.#length -= 1;
+        return removedNode;
     }
 
     // удаление всех элементов
@@ -193,72 +208,47 @@ class LinkedList {
 
     // разворот list
     reverse() {
-        if (this.#length === 0) {
-            return 'Linked List is empty';
-        }
+        if (this.#length <= 1) return this;
 
-        if (this.#length === 1) {
-            return this;
-        }
+        let current = this.#head;
+        let temp = null;
 
-        this.#tail = this.#head;
+        // Меняем head и tail
+        [this.#head, this.#tail] = [this.#tail, this.#head];
 
-        while (this.#head) {
-            if (this.#head.next) {
-                const next = this.#head.next;
-                this.#head.next = this.#head.prev;
-                this.#head.prev = next;
-                this.#head = next;
-            } else {
-                const prev = this.#head.prev;
-                this.#head.next = prev;
-                this.#head.prev = null;
-            }
+        while (current) {
+            // Сохраняем ссылку на следующий элемент
+            temp = current.next;
+            // Меняем местами next и prev
+            current.next = current.prev;
+            current.prev = temp;
+            // Переходим к следующему элементу (бывшему prev)
+            current = temp;
         }
 
         return this;
     }
 
-    // нахождение node
-    findNode(node) {
-        if (this.#length === 0) {
-            return false;
+    // нахождение node по значению
+    findNodeByValue(value) {
+        let current = this.#head;
+        while (current) {
+            if (current.value === value) return current;
+            current = current.next;
+        }
+        return null;
+    }
+
+    // нахождение node по индексу
+    findNodeByIndex(index) {
+        if (index < 0 || index >= this.#length) return null;
+
+        let current = this.#head;
+        for (let i = 0; i < index; i++) {
+            current = current.next;
         }
 
-        let list = this.#head;
-        let listEnd = this.#tail;
-
-        while (true) {
-            if (
-                list.val === node.val &&
-                list.next === node.next &&
-                list.prev === node.prev
-            ) {
-                return list;
-            }
-
-            if (list === listEnd) {
-                break;
-            }
-
-            if (
-                listEnd.val === node.val &&
-                listEnd.next === node.next &&
-                listEnd.prev === node.prev
-            ) {
-                return listEnd;
-            }
-
-            list = list.next;
-
-            if (list === listEnd) {
-                break;
-            }
-
-            listEnd = listEnd.prev;
-        }
-
-        return false;
+        return current;
     }
 
     // метод поиска цикла
@@ -281,6 +271,28 @@ class LinkedList {
         }
 
         return b ? true : false;
+    }
+
+    // преобразование в массив
+    toArray() {
+        const result = [];
+        let current = this.#head;
+        while (current) {
+            result.push(current.value);
+            current = current.next;
+        }
+        return result;
+    }
+
+    // поиск зачения по индексу
+    get(index) {
+        if (index < 0 || index >= this.#length) return null;
+        return this.findNodeByIndex(index).value;
+    }
+
+    // проверка на наличие значения
+    contains(value) {
+        return this.findNodeByValue(value) !== null;
     }
 }
 
